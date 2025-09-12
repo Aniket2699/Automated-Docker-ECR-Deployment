@@ -1,25 +1,11 @@
 const express = require('express');
-
 const app = express();
-
-
-// Respond with "Hello World" when a GET request is made to the root "/"
+const port = process.env.PORT || 3000;
 
 app.get('/', (req, res) => {
-
-  res.send('Successfull');
-
+  res.json({ message: 'Hello from sample-node-app', time: new Date().toISOString() });
 });
 
-
-// Start server on port 3000 or custom port via environment variable
-
-const PORT = process.env.PORT || 3000;
-
-app.listen(PORT, () => {
-
-  console.log(`Server is running on http://localhost:${PORT}`);
-
+app.listen(port, () => {
+  console.log(`App listening on port ${port}`);
 });
-
-module.exports = app;

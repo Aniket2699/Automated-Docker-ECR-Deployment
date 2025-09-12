@@ -11,13 +11,13 @@ pipeline {
     stages {
         stage('Checkout Code') {
             steps {
-                git credentialsId: 'github-creds', url: 'https://github.com/Aniket2699/mynodeapp.git', branch: 'master'
+                git credentialsId: 'git-cred', url: 'https://github.com/Aniket2699/mynodeapp.git', branch: 'master'
             }
         }
 
         stage('Login to AWS ECR') {
             steps {
-                withCredentials([[$class: 'AmazonWebServicesCredentialsBinding', credentialsId: 'aws-creds']]) {
+                withCredentials([[$class: 'AmazonWebServicesCredentialsBinding', credentialsId: 'AWS-cred']]) {
                     sh '''
                         echo "Logging into Amazon ECR..."
                         aws ecr get-login-password --region $AWS_DEFAULT_REGION | docker login --username AWS --password-stdin $ECR_REGISTRY

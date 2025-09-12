@@ -11,7 +11,7 @@ pipeline {
     stages {
         stage('Checkout Code') {
             steps {
-                git credentialsId: 'github-creds', url: 'https://github.com/your-username/mynodeapp.git', branch: 'master'
+                git credentialsId: 'github-creds', url: 'https://github.com/Aniket2699/mynodeapp.git', branch: 'master'
             }
         }
 

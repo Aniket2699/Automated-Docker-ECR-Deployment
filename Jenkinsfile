@@ -11,7 +11,7 @@ pipeline {
     stages {
         stage('Checkout Code') {
             steps {
-                git credentialsId: 'git-cred', url: 'https://github.com/Aniket2699/mynodeapp.git', branch: 'master'
+                git credentialsId: 'git-cred', url: 'https://github.com/Aniket2699/automated-docker-ecr-deployment.git', branch: 'master'
             }
         }
 

@@ -1,0 +1,70 @@
+const AWS = require('aws-sdk');
+const dynamoDB = new AWS.DynamoDB.DocumentClient();
+const sns = new AWS.SNS();
+const s3 = new AWS.S3();
+
+const DYNAMO_TABLE = "ECRImageLogs";
+const SNS_TOPIC_ARN = "arn:aws:sns:us-east-1:124931565674:ECRImagePushTopic";
+const S3_BUCKET = "ecr-image-metadata-124931565674";
+
+exports.handler = async (event) => {
+    console.log("Received event:", JSON.stringify(event, null, 2));
+
+    try {
+        // Extract ECR details from the EventBridge event
+        const repoName = event.detail['repository-name'];
+        const imageTag = event.detail['image-tag'] || "latest";
+        const imageDigest = event.detail['image-digest'];
+        const timestamp = new Date().toISOString();
+
+        if (!repoName || !imageTag) {
+            throw new Error("Missing repository name or image tag in the event payload");
+        }
+
+        // 1. Log details into DynamoDB
+        const dbItem = {
+            TableName: DYNAMO_TABLE,
+            Item: {
+                ImageTag: imageTag,
+                Repository: repoName,
+                Timestamp: timestamp,
+                ImageDigest: imageDigest
+            }
+        };
+        await dynamoDB.put(dbItem).promise();
+        console.log("Logged to DynamoDB:", dbItem);
+
+        // 2. Send SNS Notification
+        const snsMessage = `New Docker image pushed!\nRepository: ${repoName}\nTag: ${imageTag}\nDigest: ${imageDigest}\nTimestamp: ${timestamp}`;
+        await sns.publish({
+            TopicArn: SNS_TOPIC_ARN,
+            Message: snsMessage,
+            Subject: "ECR Image Push Notification"
+        }).promise();
+        console.log("SNS notification sent");
+
+        // 3. Update Metadata in S3
+        const s3Key = `metadata/${repoName}-${imageTag}.json`;
+        const s3Body = JSON.stringify({
+            repository: repoName,
+            imageTag: imageTag,
+            imageDigest: imageDigest,
+            timestamp: timestamp
+        });
+        await s3.putObject({
+            Bucket: S3_BUCKET,
+            Key: s3Key,
+            Body: s3Body,
+            ContentType: "application/json"
+        }).promise();
+        console.log("Metadata uploaded to S3");
+
+        return {
+            statusCode: 200,
+            body: JSON.stringify('Post-deployment tasks completed successfully!')
+        };
+    } catch (error) {
+        console.error("Error processing event:", error);
+        throw error;
+    }
+};

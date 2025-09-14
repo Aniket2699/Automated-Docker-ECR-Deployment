@@ -9,9 +9,8 @@ Once an image is pushed to ECR, **Amazon EventBridge** triggers a Lambda functio
 ---
 
 ## Architecture Diagram
-![Architecture Diagram](A_flowchart_diagram_illustrates_an_automated_Docke.png)
+<img width="1536" height="1024" alt="image" src="https://github.com/user-attachments/assets/5fc360ed-e048-4f4d-82b2-77ec9aaf3cad" />
 
----
 
 ## Workflow
 1. **Source Code Management**: 
